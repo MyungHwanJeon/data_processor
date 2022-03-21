@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="player" pkg="player" type="player" output="screen" />
+
+</launch>

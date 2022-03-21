@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="recoder" pkg="recoder" type="recoder" output="screen" />
+
+</launch>
