@@ -52,6 +52,15 @@ public:
     vector<string> m_camera_color_file_list;
     vector<string> m_camera_depth_file_list;
     vector<string> m_detection_result_mask_file_list;
+    vector<int64_t> m_detection_result_time_list;
+
+    pair<string, cv::Mat> m_camera_color_next;
+    pair<string, cv::Mat> m_camera_depth_next;
+    std::vector<std::pair<string, cv::Mat>> m_detection_mask_next;
+
+    int m_camera_color_prev_idx;
+    int m_camera_depth_prev_idx;
+    int m_detection_result_prev_idx;
 
     void ros_initialize(ros::NodeHandle &n_);
     void run();

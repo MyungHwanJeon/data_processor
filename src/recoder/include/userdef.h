@@ -79,7 +79,7 @@ struct DataThread
     long cnt;
     bool active;
 
-    DataThread() : active(false){}
+    DataThread() : active(false), cnt(0){}
 
     void push(std::pair<T1, T2> data)
     {

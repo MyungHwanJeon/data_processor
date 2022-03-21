@@ -90,7 +90,8 @@ void MainWindow::on_pushButton_pause_pressed()
 
 void MainWindow::on_horizontalSlider_pos_valueChanged(int value)
 {
-    m_slider_value = value;
+    if (value < 1)    m_slider_value = 1;
+    else              m_slider_value = value;  
 }
 
 void MainWindow::on_horizontalSlider_pos_sliderPressed()
