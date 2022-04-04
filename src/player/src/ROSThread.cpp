@@ -55,7 +55,7 @@ ROSThread::~ROSThread()
     m_camera_depth_data.cv.notify_all();
     m_detection_result_data.cv.notify_all();
 
-    usleep(1000000);
+    sleep(1);
 
     if(m_data_stamp_data.thd.joinable())    m_data_stamp_data.thd.join();
     if(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
@@ -64,6 +64,8 @@ ROSThread::~ROSThread()
     if(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
     if(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
     if(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
+
+    sleep(1);
 }
 
 void ROSThread::ros_initialize(ros::NodeHandle &n)
@@ -118,8 +120,9 @@ void ROSThread::ready()
     if(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
     if(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
 
+    sleep(1);
 
-
+    ResetProcessStamp(1);    
 
     ifstream fs;
     int64_t stamp;

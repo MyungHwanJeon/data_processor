@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_play_speed = 1.0;
 
     ui->horizontalSlider_pos->setRange(0,10000);
-    ui->horizontalSlider_pos->setValue(0);
-    m_slider_value = 0;
+    ui->horizontalSlider_pos->setValue(1);
+    m_slider_value = 1;
     m_slider_checker = false;
 
     connect(m_ros_thread, SIGNAL(StampShow(quint64)), this, SLOT(SetStamp(quint64)));
@@ -50,8 +50,13 @@ void MainWindow::on_pushButton_load_path_pressed()
 
     QFileDialog dialog;
     m_data_load_path = dialog.getExistingDirectory();
+    dialog.close();
+
+    sleep(1);
+
     ui->textEdit_load_path->setText(m_data_load_path);
     m_ros_thread->m_data_load_path = m_data_load_path.toUtf8().constData();
+    
 
     m_ros_thread->m_play_flag = false;
     m_ros_thread->m_pause_flag = false;
@@ -60,6 +65,9 @@ void MainWindow::on_pushButton_load_path_pressed()
     ui->pushButton_pause->setEnabled(false);
 
     m_ros_thread->ready();
+
+    m_slider_value = 1;
+    ui->horizontalSlider_pos->setValue(1);
 
     ui->pushButton_load_path->setEnabled(true);
 }
