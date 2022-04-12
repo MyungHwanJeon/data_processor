@@ -137,9 +137,22 @@ void ROSThread::ready()
     fs.close();
 
     // load data stamp
-
     fs.open((m_data_load_path + "/data_stamp.csv").c_str());
     m_data_stamp.clear();
+    // while (!fs.eof())
+    // {
+    //     getline(fs, line);
+    //     if (line.size() < 1)    break;
+
+    //     std::vector<std::string> splited = split(line, ',');
+
+    //     m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
+    // }
+
+    long time_franka_state_prev = 0;
+    long time_franka_state_next = 0;
+    long time_detection_result = 0;   
+    bool flag_detection_result = false; 
     while (!fs.eof())
     {
         getline(fs, line);
@@ -147,7 +160,42 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
+        if (splited[1].compare("detection_result") == 0)
+        {            
+            time_detection_result = stol(splited[0]);
+            flag_detection_result = true;
+        }
+        else if(splited[1].compare("franka_states") == 0)
+        {
+            if (!flag_detection_result)
+            {
+                time_franka_state_prev = std::stol(splited[0]);
+            }
+            else
+            {
+                time_franka_state_next = std::stol(splited[0]);
+
+                long prev_time_diff = abs(time_franka_state_prev - time_detection_result);
+                long next_time_diff = abs(time_franka_state_next - time_detection_result);
+
+                if (prev_time_diff >= next_time_diff)
+                {
+                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
+                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_next, "franka_states"));
+                }
+                else
+                {
+                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
+                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_prev, "franka_states"));
+                }
+
+                flag_detection_result = false;
+            }
+        }
+        else
+        {
+            m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
+        }        
     }
 
     m_initial_data_stamp = m_data_stamp.begin()->first - 1;
