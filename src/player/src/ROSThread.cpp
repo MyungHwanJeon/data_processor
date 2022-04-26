@@ -57,13 +57,23 @@ ROSThread::~ROSThread()
 
     sleep(1);
 
-    if(m_data_stamp_data.thd.joinable())    m_data_stamp_data.thd.join();
-    if(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
-    if(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
-    if(m_camera_info_data.thd.joinable())    m_camera_info_data.thd.join();
-    if(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
-    if(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
-    if(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
+    if(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.detach();
+    if(m_franka_states_data.thd.joinable()) m_franka_states_data.thd.detach();
+    if(m_franka_joint_states_data.thd.joinable()) m_franka_joint_states_data.thd.detach();
+    if(m_camera_info_data.thd.joinable()) m_camera_info_data.thd.detach();
+    if(m_camera_color_data.thd.joinable()) m_camera_color_data.thd.detach();
+    if(m_camera_depth_data.thd.joinable()) m_camera_depth_data.thd.detach();
+    if(m_detection_result_data.thd.joinable()) m_detection_result_data.thd.detach();
+
+    sleep(1);
+
+    while(m_data_stamp_data.thd.joinable())    m_data_stamp_data.thd.join();
+    while(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
+    while(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
+    while(m_camera_info_data.thd.joinable())    m_camera_info_data.thd.join();
+    while(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
+    while(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
+    while(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
 
     sleep(1);
 }
@@ -112,13 +122,25 @@ void ROSThread::ready()
     m_camera_depth_data.cv.notify_all();
     m_detection_result_data.cv.notify_all();
 
-    if(m_data_stamp_data.thd.joinable())    m_data_stamp_data.thd.join();
-    if(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
-    if(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
-    if(m_camera_info_data.thd.joinable())    m_camera_info_data.thd.join();
-    if(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
-    if(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
-    if(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
+    sleep(1);
+
+    if(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.detach();
+    if(m_franka_states_data.thd.joinable()) m_franka_states_data.thd.detach();
+    if(m_franka_joint_states_data.thd.joinable()) m_franka_joint_states_data.thd.detach();
+    if(m_camera_info_data.thd.joinable()) m_camera_info_data.thd.detach();
+    if(m_camera_color_data.thd.joinable()) m_camera_color_data.thd.detach();
+    if(m_camera_depth_data.thd.joinable()) m_camera_depth_data.thd.detach();
+    if(m_detection_result_data.thd.joinable()) m_detection_result_data.thd.detach();
+
+    sleep(1);
+
+    while(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.join();    
+    while(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
+    while(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
+    while(m_camera_info_data.thd.joinable())    m_camera_info_data.thd.join();
+    while(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
+    while(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
+    while(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
 
     sleep(1);
 
@@ -139,20 +161,6 @@ void ROSThread::ready()
     // load data stamp
     fs.open((m_data_load_path + "/data_stamp.csv").c_str());
     m_data_stamp.clear();
-    // while (!fs.eof())
-    // {
-    //     getline(fs, line);
-    //     if (line.size() < 1)    break;
-
-    //     std::vector<std::string> splited = split(line, ',');
-
-    //     m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
-    // }
-
-    long time_franka_state_prev = 0;
-    long time_franka_state_next = 0;
-    long time_detection_result = 0;   
-    bool flag_detection_result = false; 
     while (!fs.eof())
     {
         getline(fs, line);
@@ -160,43 +168,57 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        if (splited[1].compare("detection_result") == 0)
-        {            
-            time_detection_result = stol(splited[0]);
-            flag_detection_result = true;
-        }
-        else if(splited[1].compare("franka_states") == 0)
-        {
-            if (!flag_detection_result)
-            {
-                time_franka_state_prev = std::stol(splited[0]);
-            }
-            else
-            {
-                time_franka_state_next = std::stol(splited[0]);
-
-                long prev_time_diff = abs(time_franka_state_prev - time_detection_result);
-                long next_time_diff = abs(time_franka_state_next - time_detection_result);
-
-                if (prev_time_diff >= next_time_diff)
-                {
-                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
-                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_next, "franka_states"));
-                }
-                else
-                {
-                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
-                    m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_prev, "franka_states"));
-                }
-
-                flag_detection_result = false;
-            }
-        }
-        else
-        {
-            m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
-        }        
+        m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
     }
+
+    // long time_franka_state_prev = 0;
+    // long time_franka_state_next = 0;
+    // long time_detection_result = 0;   
+    // bool flag_detection_result = false; 
+    // while (!fs.eof())
+    // {
+    //     getline(fs, line);
+    //     if (line.size() < 1)    break;
+
+    //     std::vector<std::string> splited = split(line, ',');
+
+    //     if (splited[1].compare("detection_result") == 0)
+    //     {            
+    //         time_detection_result = stol(splited[0]);
+    //         flag_detection_result = true;
+    //     }
+    //     else if(splited[1].compare("franka_states") == 0)
+    //     {
+    //         if (!flag_detection_result)
+    //         {
+    //             time_franka_state_prev = std::stol(splited[0]);
+    //         }
+    //         else
+    //         {
+    //             time_franka_state_next = std::stol(splited[0]);
+
+    //             long prev_time_diff = abs(time_franka_state_prev - time_detection_result);
+    //             long next_time_diff = abs(time_franka_state_next - time_detection_result);
+
+    //             if (prev_time_diff >= next_time_diff)
+    //             {
+    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
+    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_next, "franka_states"));
+    //             }
+    //             else
+    //             {
+    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
+    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_prev, "franka_states"));
+    //             }
+
+    //             flag_detection_result = false;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
+    //     }        
+    // }
 
     m_initial_data_stamp = m_data_stamp.begin()->first - 1;
     m_last_data_stamp = prev(m_data_stamp.end(),1)->first - 1;
@@ -619,6 +641,7 @@ void ROSThread::CameraColorPublish()
             {
                 std::string img_path = m_data_load_path + "/camera/color/" + to_string(data) + ".png";
                 cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);
+                cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
                 cv_bridge::CvImage msg;
                 msg.header.stamp.fromNSec(data);
@@ -635,7 +658,8 @@ void ROSThread::CameraColorPublish()
             if (current_img_index < m_camera_color_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/color/" + m_camera_color_file_list[current_img_index + 1];
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);                
+                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);      
+                cv::cvtColor(img, img, cv::COLOR_BGR2RGB);          
 
                 if (!img.empty())
                 {
