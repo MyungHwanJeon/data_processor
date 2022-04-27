@@ -55,8 +55,6 @@ ROSThread::~ROSThread()
     m_camera_depth_data.cv.notify_all();
     m_detection_result_data.cv.notify_all();
 
-    sleep(1);
-
     if(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.detach();
     if(m_franka_states_data.thd.joinable()) m_franka_states_data.thd.detach();
     if(m_franka_joint_states_data.thd.joinable()) m_franka_joint_states_data.thd.detach();
@@ -65,8 +63,6 @@ ROSThread::~ROSThread()
     if(m_camera_depth_data.thd.joinable()) m_camera_depth_data.thd.detach();
     if(m_detection_result_data.thd.joinable()) m_detection_result_data.thd.detach();
 
-    sleep(1);
-
     while(m_data_stamp_data.thd.joinable())    m_data_stamp_data.thd.join();
     while(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
     while(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
@@ -74,8 +70,6 @@ ROSThread::~ROSThread()
     while(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
     while(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
     while(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
-
-    sleep(1);
 }
 
 void ROSThread::ros_initialize(ros::NodeHandle &n)
@@ -122,8 +116,6 @@ void ROSThread::ready()
     m_camera_depth_data.cv.notify_all();
     m_detection_result_data.cv.notify_all();
 
-    sleep(1);
-
     if(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.detach();
     if(m_franka_states_data.thd.joinable()) m_franka_states_data.thd.detach();
     if(m_franka_joint_states_data.thd.joinable()) m_franka_joint_states_data.thd.detach();
@@ -132,8 +124,6 @@ void ROSThread::ready()
     if(m_camera_depth_data.thd.joinable()) m_camera_depth_data.thd.detach();
     if(m_detection_result_data.thd.joinable()) m_detection_result_data.thd.detach();
 
-    sleep(1);
-
     while(m_data_stamp_data.thd.joinable()) m_data_stamp_data.thd.join();    
     while(m_franka_states_data.thd.joinable())    m_franka_states_data.thd.join();
     while(m_franka_joint_states_data.thd.joinable())    m_franka_joint_states_data.thd.join();
@@ -141,8 +131,6 @@ void ROSThread::ready()
     while(m_camera_color_data.thd.joinable())    m_camera_color_data.thd.join();
     while(m_camera_depth_data.thd.joinable())    m_camera_depth_data.thd.join();
     while(m_detection_result_data.thd.joinable())    m_detection_result_data.thd.join();
-
-    sleep(1);
 
     ResetProcessStamp(1);    
 
@@ -376,7 +364,7 @@ void ROSThread::ready()
 
     GetDirList(m_data_load_path + "/camera/color/", m_camera_color_file_list);
     GetDirList(m_data_load_path + "/camera/depth/", m_camera_depth_file_list);
-    GetDirList(m_data_load_path + "/detection_result/mask/", m_detection_result_mask_file_list);
+    GetDirList(m_data_load_path + "/detection_result/mask/", m_detection_result_mask_file_list);    
 
     m_data_stamp_data.active = true;
     m_franka_states_data.active = true;
@@ -394,7 +382,6 @@ void ROSThread::ready()
     m_camera_color_data.thd = std::thread(&ROSThread::CameraColorPublish, this);
     m_camera_depth_data.thd = std::thread(&ROSThread::CameraDepthPublish, this);
     m_detection_result_data.thd = std::thread(&ROSThread::DetectionResultPublish, this);
-
 }
 
 void ROSThread::TimerCallback(const ros::TimerEvent&)
@@ -658,8 +645,8 @@ void ROSThread::CameraColorPublish()
             if (current_img_index < m_camera_color_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/color/" + m_camera_color_file_list[current_img_index + 1];
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);      
-                cv::cvtColor(img, img, cv::COLOR_BGR2RGB);          
+                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);
+                cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
                 if (!img.empty())
                 {
@@ -700,7 +687,7 @@ void ROSThread::CameraDepthPublish()
                 msg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
                 msg.image = m_camera_depth_next.second;
 
-                m_camera_depth_pub.publish(msg.toImageMsg());
+                m_camera_depth_pub.publish(msg.toImageMsg());                                
             }
             else
             {
@@ -715,7 +702,7 @@ void ROSThread::CameraDepthPublish()
 
                 m_camera_depth_pub.publish(msg.toImageMsg());
 
-                m_camera_depth_prev_idx = 0;
+                m_camera_depth_prev_idx = 0;                
             }
 
             int current_img_index = find(next(m_camera_depth_file_list.begin(), max(0, m_camera_depth_prev_idx - 10)), m_camera_depth_file_list.end(), to_string(data) + ".png") - m_camera_depth_file_list.begin();
