@@ -19,6 +19,8 @@ ROSThread::ROSThread(QObject *parent, QMutex *th_mutex) :
 
     m_stamp_show_count = 0;
 
+    // m_stop_skip_flag = false;
+
     m_camera_color_prev_idx = 0;
     m_camera_depth_prev_idx = 0;
     m_detection_result_prev_idx = 0;
@@ -156,7 +158,7 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
+        m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0])+1, splited[1]));
     }
 
     // long time_franka_state_prev = 0;
@@ -225,7 +227,7 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        stamp = std::stol(splited[0]);
+        stamp = std::stol(splited[0])+1;
         frank_state.header.stamp.fromNSec(stamp);
 
         for (int i=0; i<16; i++)    frank_state.O_T_EE[i] = std::stod(splited[1+i]);
@@ -251,7 +253,7 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        stamp = std::stol(splited[0]);
+        stamp = std::stol(splited[0])+1;
         joint_state.header.stamp.fromNSec(stamp);
 
         joint_state.name.resize(7);
@@ -280,17 +282,17 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        stamp = std::stol(splited[0]);
+        stamp = std::stol(splited[0])+1;
         camera_info.header.stamp.fromNSec(stamp);
 
         camera_info.width = std::stoi(splited[1]);
         camera_info.height = std::stoi(splited[2]);
         camera_info.distortion_model = splited[3];
         camera_info.D.resize(5);        
-        for (int i=0; i<5; i++) camera_info.D[i] = std::stod(splited[4+i]);
-        for (int i=0; i<9; i++) camera_info.K[i] = std::stod(splited[4+5+i]);
-        for (int i=0; i<9; i++) camera_info.R[i] = std::stod(splited[4+5+9+i]);
-        for (int i=0; i<12; i++) camera_info.P[i] = std::stod(splited[4+5+9+9+i]);
+        for (int i=0; i<5; i++) camera_info.D[i] = std::stod(splited[4+i]);        
+        for (int i=0; i<9; i++) camera_info.K[i] = std::stod(splited[4+5+i]);        
+        for (int i=0; i<9; i++) camera_info.R[i] = std::stod(splited[4+5+9+i]);        
+        for (int i=0; i<12; i++) camera_info.P[i] = std::stod(splited[4+5+9+9+i]);        
         camera_info.binning_x = std::stoi(splited[4+5+9+9+12]);
         camera_info.binning_y = std::stoi(splited[4+5+9+9+12+1]);
 
@@ -311,7 +313,7 @@ void ROSThread::ready()
 
         std::vector<std::string> splited = split(line, ',');
 
-        stamp = std::stol(splited[0]);
+        stamp = std::stol(splited[0])+1;
         detection2darray.header.stamp.fromNSec(stamp);
 
         detection2darray.detections.resize(std::stoi(splited[1]));
@@ -395,8 +397,8 @@ void ROSThread::TimerCallback(const ros::TimerEvent&)
 
     if(m_play_flag == false)
     {
-//        m_processed_stamp = 0; //reset
-//        m_prev_clock_stamp = 0;
+    //    m_processed_stamp = 0; //reset
+    //    m_prev_clock_stamp = 0;
     }
 }
 
@@ -614,7 +616,7 @@ void ROSThread::CameraColorPublish()
 
             if(m_camera_color_file_list.size() == 0) continue;            
 
-            if (to_string(data)+".png" == m_camera_color_next.first && !m_camera_color_next.second.empty())
+            if (to_string(data - 1)+".png" == m_camera_color_next.first && !m_camera_color_next.second.empty())
             {                
                 cv_bridge::CvImage msg;
                 msg.header.stamp.fromNSec(data);
@@ -626,7 +628,7 @@ void ROSThread::CameraColorPublish()
             }
             else
             {
-                std::string img_path = m_data_load_path + "/camera/color/" + to_string(data) + ".png";
+                std::string img_path = m_data_load_path + "/camera/color/" + to_string(data - 1) + ".png";
                 cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);
                 cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
@@ -641,7 +643,7 @@ void ROSThread::CameraColorPublish()
                 m_camera_color_prev_idx = 0;                            
             }
 
-            int current_img_index = find(next(m_camera_color_file_list.begin(), max(0, m_camera_color_prev_idx - 10)), m_camera_color_file_list.end(), to_string(data)+".png") - m_camera_color_file_list.begin();
+            int current_img_index = find(next(m_camera_color_file_list.begin(), max(0, m_camera_color_prev_idx - 10)), m_camera_color_file_list.end(), to_string(data - 1)+".png") - m_camera_color_file_list.begin();
             if (current_img_index < m_camera_color_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/color/" + m_camera_color_file_list[current_img_index + 1];
@@ -679,7 +681,7 @@ void ROSThread::CameraDepthPublish()
 
             if (m_camera_depth_file_list.size() == 0)   continue;
 
-            if (to_string(data) + ".png" == m_camera_depth_next.first && !m_camera_depth_next.second.empty())
+            if (to_string(data - 1) + ".png" == m_camera_depth_next.first && !m_camera_depth_next.second.empty())
             {
                 cv_bridge::CvImage msg;
                 msg.header.stamp.fromNSec(data);
@@ -691,7 +693,7 @@ void ROSThread::CameraDepthPublish()
             }
             else
             {
-                std::string img_path = m_data_load_path + "/camera/depth/" + to_string(data) + ".png";
+                std::string img_path = m_data_load_path + "/camera/depth/" + to_string(data - 1) + ".png";
                 cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_ANYDEPTH);
 
                 cv_bridge::CvImage msg;
@@ -705,7 +707,7 @@ void ROSThread::CameraDepthPublish()
                 m_camera_depth_prev_idx = 0;                
             }
 
-            int current_img_index = find(next(m_camera_depth_file_list.begin(), max(0, m_camera_depth_prev_idx - 10)), m_camera_depth_file_list.end(), to_string(data) + ".png") - m_camera_depth_file_list.begin();
+            int current_img_index = find(next(m_camera_depth_file_list.begin(), max(0, m_camera_depth_prev_idx - 10)), m_camera_depth_file_list.end(), to_string(data - 1) + ".png") - m_camera_depth_file_list.begin();
             if (current_img_index < m_camera_depth_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/depth/" + m_camera_depth_file_list[current_img_index + 1];
@@ -759,7 +761,7 @@ void ROSThread::DetectionResultPublish()
             {
                 for (int i = 0; i < n_obj; i++)
                 {
-                    std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[data].detections[i].results[0].id) + "_" + to_string(data) + ".png";
+                    std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[data].detections[i].results[0].id) + "_" + to_string(data-1) + ".png";
                     cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
 
                     cv_bridge::CvImage msg;
@@ -781,7 +783,7 @@ void ROSThread::DetectionResultPublish()
             n_obj = m_detection_result_data_list[next_stamp].detections.size();
             for (int i = 0; i < n_obj; i++)
             {
-                std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[next_stamp].detections[i].results[0].id) + "_" + to_string(next_stamp)+".png";
+                std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[next_stamp].detections[i].results[0].id) + "_" + to_string(next_stamp-1)+".png";
                 cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
 
                 m_detection_mask_next.push_back(make_pair(img_path, img));
