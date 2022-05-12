@@ -496,7 +496,8 @@ void ROSThread::DataStampThread()
             emit StampShow(stamp);
         }
 
-        if(m_prev_clock_stamp == 0 || (stamp - m_prev_clock_stamp) > 10000000)
+        // if(m_prev_clock_stamp == 0 || (stamp - m_prev_clock_stamp) > 10000000)
+        if(m_prev_clock_stamp == 0 || (stamp - m_prev_clock_stamp) > 1000000)
         {
             rosgraph_msgs::Clock clock;
 
