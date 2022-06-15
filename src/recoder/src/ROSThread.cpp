@@ -67,9 +67,9 @@ void ROSThread::ros_initialize(ros::NodeHandle &n)
     m_franka_states_sub = nh.subscribe<franka_rpm_msgs::FrankaState>("/franka_rpm/franka_states", 1000, boost::bind(&ROSThread::FrankaStatesCallback, this, _1));
     m_franka_joint_states_sub = nh.subscribe<sensor_msgs::JointState>("/franka_rpm/joint_states", 1000, boost::bind(&ROSThread::FrankaJointStatesCallback, this, _1));
 
-    m_camera_info_sub = nh.subscribe<sensor_msgs::CameraInfo>("/camera/color/camera_info", 1000, boost::bind(&ROSThread::CameraInfoCallback, this, _1));
+    m_camera_info_sub = nh.subscribe<sensor_msgs::CameraInfo>("/pose_estimation/PrimA6D/camera_info", 1000, boost::bind(&ROSThread::CameraInfoCallback, this, _1));
     m_camera_color_sub = nh.subscribe<sensor_msgs::Image>("/pose_estimation/PrimA6D/color_raw", 1000, boost::bind(&ROSThread::CameraColorCallback, this, _1));
-    m_camera_depth_sub = nh.subscribe<sensor_msgs::Image>("//pose_estimation/PrimA6D/depth_raw", 1000, boost::bind(&ROSThread::CameraDepthCallback, this, _1));
+    m_camera_depth_sub = nh.subscribe<sensor_msgs::Image>("/pose_estimation/PrimA6D/depth_raw", 1000, boost::bind(&ROSThread::CameraDepthCallback, this, _1));
 
     m_detection_results_sub = nh.subscribe<vision_msgs::Detection2DArray>("/pose_estimation/PrimA6D/detection2D_array", 1000, boost::bind(&ROSThread::DetectionResultCallback, this, _1));
 }

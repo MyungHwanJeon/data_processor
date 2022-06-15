@@ -86,7 +86,7 @@ void ROSThread::ros_initialize(ros::NodeHandle &n)
     m_franka_states_pub = nh.advertise<franka_rpm_msgs::FrankaState>("/franka_rpm/franka_states", 1000);
     m_franka_joint_states_pub = nh.advertise<sensor_msgs::JointState>("/franka_rpm/joint_states", 1000);
 
-    m_camera_info_pub = nh.advertise<sensor_msgs::CameraInfo>("/camera/color/camera_info", 1000);
+    m_camera_info_pub = nh.advertise<sensor_msgs::CameraInfo>("/pose_estimation/PrimA6D/camera_info", 1000);
     m_camera_color_pub = nh.advertise<sensor_msgs::Image>("/pose_estimation/PrimA6D/color_raw", 1000);
     m_camera_depth_pub = nh.advertise<sensor_msgs::Image>("/pose_estimation/PrimA6D/depth_raw", 1000);
 
