@@ -101,6 +101,7 @@ public:
 
 signals:
     void StampShow(quint64 stamp);
+    void PlayEnd();
 };
 
 #endif

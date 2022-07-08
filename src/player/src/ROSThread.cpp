@@ -8,9 +8,7 @@ ROSThread::ROSThread(QObject *parent, QMutex *th_mutex) :
     m_total_file_mutex = new QMutex;
 
     m_play_flag = false;
-    m_pause_flag = false;
-
-    m_loop_flag = false;
+    m_pause_flag = false;    
 
     m_play_speed = 1.0;
 
@@ -81,7 +79,7 @@ void ROSThread::ros_initialize(ros::NodeHandle &n)
     m_pre_timer_stamp = ros::Time::now().toNSec();
     m_timer = nh.createTimer(ros::Duration(0.0001), boost::bind(&ROSThread::TimerCallback, this, _1));
 
-    m_clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 1);
+    // m_clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 1);
 
     m_franka_states_pub = nh.advertise<franka_rpm_msgs::FrankaState>("/franka_rpm/franka_states", 1000);
     m_franka_joint_states_pub = nh.advertise<sensor_msgs::JointState>("/franka_rpm/joint_states", 1000);
@@ -160,56 +158,6 @@ void ROSThread::ready()
 
         m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0])+1, splited[1]));
     }
-
-    // long time_franka_state_prev = 0;
-    // long time_franka_state_next = 0;
-    // long time_detection_result = 0;   
-    // bool flag_detection_result = false; 
-    // while (!fs.eof())
-    // {
-    //     getline(fs, line);
-    //     if (line.size() < 1)    break;
-
-    //     std::vector<std::string> splited = split(line, ',');
-
-    //     if (splited[1].compare("detection_result") == 0)
-    //     {            
-    //         time_detection_result = stol(splited[0]);
-    //         flag_detection_result = true;
-    //     }
-    //     else if(splited[1].compare("franka_states") == 0)
-    //     {
-    //         if (!flag_detection_result)
-    //         {
-    //             time_franka_state_prev = std::stol(splited[0]);
-    //         }
-    //         else
-    //         {
-    //             time_franka_state_next = std::stol(splited[0]);
-
-    //             long prev_time_diff = abs(time_franka_state_prev - time_detection_result);
-    //             long next_time_diff = abs(time_franka_state_next - time_detection_result);
-
-    //             if (prev_time_diff >= next_time_diff)
-    //             {
-    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
-    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_next, "franka_states"));
-    //             }
-    //             else
-    //             {
-    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_detection_result, "detection_result"));
-    //                 m_data_stamp.insert(multimap<int64_t, string>::value_type(time_franka_state_prev, "franka_states"));
-    //             }
-
-    //             flag_detection_result = false;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         m_data_stamp.insert(multimap<int64_t, string>::value_type(std::stol(splited[0]), splited[1]));
-    //     }        
-    // }
-
     m_initial_data_stamp = m_data_stamp.begin()->first - 1;
     m_last_data_stamp = prev(m_data_stamp.end(),1)->first - 1;
 
@@ -398,7 +346,7 @@ void ROSThread::TimerCallback(const ros::TimerEvent&)
     if(m_play_flag == false)
     {
     //    m_processed_stamp = 0; //reset
-    //    m_prev_clock_stamp = 0;
+       m_prev_clock_stamp = 0;
     }
 }
 
@@ -495,32 +443,26 @@ void ROSThread::DataStampThread()
             m_stamp_show_count = 0;
             emit StampShow(stamp);
         }
-
-        // if(m_prev_clock_stamp == 0 || (stamp - m_prev_clock_stamp) > 10000000)
+        
         if(m_prev_clock_stamp == 0 || (stamp - m_prev_clock_stamp) > 1000000)
         {
-            rosgraph_msgs::Clock clock;
+            // rosgraph_msgs::Clock clock;
+            // clock.clock.fromNSec(stamp);
+            // m_clock_pub.publish(clock);
 
-            clock.clock.fromNSec(stamp);
-            m_clock_pub.publish(clock);
             m_prev_clock_stamp = stamp;
         }
-
-        if(m_loop_flag == true && iter == prev(m_data_stamp.end(),1))
-        {
-            iter = m_data_stamp.begin();
-            stop_region_iter = m_stop_period.begin();
-            m_processed_stamp = 0;
-        }
-        if(m_loop_flag == false && iter == prev(m_data_stamp.end(),1))
+        
+        if(iter == prev(m_data_stamp.end(),1))
         {
             m_play_flag = false;
+            emit PlayEnd();
             while(!m_play_flag)
             {
+                usleep(10000);
                 iter = m_data_stamp.begin();
                 stop_region_iter = m_stop_period.begin();
-                m_processed_stamp = 0;
-                usleep(10000);
+                m_processed_stamp = 0;                
             }
         }
     }

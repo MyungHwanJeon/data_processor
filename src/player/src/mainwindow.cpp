@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_slider_checker = false;
 
     connect(m_ros_thread, SIGNAL(StampShow(quint64)), this, SLOT(SetStamp(quint64)));
+    connect(m_ros_thread, SIGNAL(PlayEnd()), this, SLOT(on_pushButton_pause_pressed()));
 
 
 }
@@ -78,7 +79,7 @@ void MainWindow::on_pushButton_play_pressed()
     ui->pushButton_pause->setEnabled(true);
 
     m_ros_thread->m_play_flag = true;
-    m_ros_thread->m_pause_flag = false;
+    m_ros_thread->m_pause_flag = false;    
 
     m_ros_thread->m_data_stamp_data.active = true;
 
