@@ -86,7 +86,7 @@ void ROSThread::ros_initialize(ros::NodeHandle &n)
 
     m_camera_info_pub = nh.advertise<sensor_msgs::CameraInfo>("/pose_estimation/PrimA6D/camera_info", 1000);
     m_camera_color_pub = nh.advertise<sensor_msgs::Image>("/pose_estimation/PrimA6D/color_raw", 1000);
-    m_camera_depth_pub = nh.advertise<sensor_msgs::Image>("/pose_estimation/PrimA6D/depth_raw", 1000);
+    m_camera_depth_pub = nh.advertise<sensor_msgs::Image>("/pose_estimation/PrimA6D/depth_raw", 1000);  
 
     m_detection_results_pub = nh.advertise<vision_msgs::Detection2DArray>("/pose_estimation/PrimA6D/detection2D_array", 1000);
 }
@@ -572,7 +572,7 @@ void ROSThread::CameraColorPublish()
             else
             {
                 std::string img_path = m_data_load_path + "/camera/color/" + to_string(data - 1) + ".png";
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);
+                cv::Mat img = cv::imread(img_path, cv::IMREAD_COLOR);
                 cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
                 cv_bridge::CvImage msg;
@@ -590,7 +590,7 @@ void ROSThread::CameraColorPublish()
             if (current_img_index < m_camera_color_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/color/" + m_camera_color_file_list[current_img_index + 1];
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_COLOR);
+                cv::Mat img = cv::imread(img_path, cv::IMREAD_COLOR);
                 cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
                 if (!img.empty())
@@ -637,7 +637,7 @@ void ROSThread::CameraDepthPublish()
             else
             {
                 std::string img_path = m_data_load_path + "/camera/depth/" + to_string(data - 1) + ".png";
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_ANYDEPTH);
+                cv::Mat img = cv::imread(img_path, cv::IMREAD_ANYDEPTH);
 
                 cv_bridge::CvImage msg;
                 msg.header.stamp.fromNSec(data);
@@ -654,7 +654,7 @@ void ROSThread::CameraDepthPublish()
             if (current_img_index < m_camera_depth_file_list.size() - 2)
             {                
                 std::string img_path = m_data_load_path + "/camera/depth/" + m_camera_depth_file_list[current_img_index + 1];
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_ANYDEPTH);                
+                cv::Mat img = cv::imread(img_path, cv::IMREAD_ANYDEPTH);                
 
                 if (!img.empty())
                 {
@@ -705,7 +705,7 @@ void ROSThread::DetectionResultPublish()
                 for (int i = 0; i < n_obj; i++)
                 {
                     std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[data].detections[i].results[0].id) + "_" + to_string(data-1) + ".png";
-                    cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
+                    cv::Mat img = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
 
                     cv_bridge::CvImage msg;
                     msg.header.stamp.fromNSec(data);
@@ -727,7 +727,7 @@ void ROSThread::DetectionResultPublish()
             for (int i = 0; i < n_obj; i++)
             {
                 std::string img_path = m_data_load_path + "/detection_result/mask/" + to_string(m_detection_result_data_list[next_stamp].detections[i].results[0].id) + "_" + to_string(next_stamp-1)+".png";
-                cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
+                cv::Mat img = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
 
                 m_detection_mask_next.push_back(make_pair(img_path, img));
             }

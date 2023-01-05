@@ -6,7 +6,6 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 
-
 find_package(catkin REQUIRED cmake_modules
   COMPONENTS
   roscpp
@@ -28,6 +27,7 @@ find_package(catkin REQUIRED cmake_modules
 set(CMAKE_AUTOMOC ON)
 
 find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 #set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 #set (CMAKE_PREFIX_PATH /opt/Qt5.6.1/5.6/gcc_64/lib/cmake)
@@ -58,7 +58,7 @@ catkin_package(
     franka_rpm_msgs
 
   DEPENDS 
-    Eigen
+    EIGEN3    
 )
 
 
@@ -84,6 +84,7 @@ include_directories(
   ${PROJECT_BINARY_DIR}
   include
   ${Eigen_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIR}
 )
 
 
@@ -129,6 +130,7 @@ target_link_libraries(player
   GL
   ${BOOST_CUSTOM_LIBS}
   ${Eigen_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 
 

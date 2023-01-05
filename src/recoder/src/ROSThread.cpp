@@ -312,7 +312,7 @@ void ROSThread::CameraColorSave()
             }
 
             vector<int> compression_params;
-            compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+            compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
             compression_params.push_back(0);
             cv::imwrite(m_data_save_path + string("/camera/color/") + to_string(data.first) + string( ".png" ), cv_ptr->image, compression_params);
         }
@@ -354,7 +354,7 @@ void ROSThread::CameraDepthSave()
             }
 
             vector<int> compression_params;
-            compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+            compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
             compression_params.push_back(0);
             cv::imwrite(m_data_save_path + string("/camera/depth/") + to_string(data.first) + string( ".png" ), cv_ptr->image, compression_params);
         }
@@ -419,7 +419,7 @@ void ROSThread::DetectionResultSave()
                 }
 
                 vector<int> compression_params;
-                compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+                compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
                 compression_params.push_back(0);
                 cv::imwrite(m_data_save_path + string("/detection_result/mask/") + to_string(data.second.detections[i].results[0].id) + string( "_" ) + to_string(data.first) + string( ".png" ), cv_ptr->image, compression_params);
             }
