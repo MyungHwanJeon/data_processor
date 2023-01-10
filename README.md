@@ -7,7 +7,7 @@ Maintainer: Myung-Hwan Jeon (myunghwan.jeon.offl@gmail.com)
 ```
 $ git clone git@github.com:MyungHwanJeon/data_processor.git
 $ cd path/to/data_processor
-$ bash catkin build
+$ catkin build
 ```
 
 ## 2. Run file player
