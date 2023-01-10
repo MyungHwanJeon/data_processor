@@ -19,7 +19,7 @@ $ roslaunch player player.launch
 
 ## 3. Download example data
 
-1. [seq1.zip](https://drive.google.com/file/d/1xjqbbVBi_ywKNBaiLADE-RErApyTHISv/view?usp=sharing). 
+1. [seq1.zip](https://drive.google.com/file/d/1RjLVM1CD9_PPHC3mpAdegeN11nYyt64p/view?usp=sharing). 
 2. unzip seq1.zip
 
 ## 4. Load data files and play
