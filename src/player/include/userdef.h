@@ -103,6 +103,16 @@ struct DataThread
         mtx.unlock();
         return result;
     }
+
+    void clear()
+    {
+        mtx.lock();
+        while (!data_queue.empty())
+        {
+            data_queue.pop();
+        }
+        mtx.unlock();
+    }
 };
 
 #endif // USERDEF_H

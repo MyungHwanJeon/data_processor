@@ -91,7 +91,7 @@ void ROSThread::ros_initialize(ros::NodeHandle &n)
     m_detection_results_pub = nh.advertise<vision_msgs::Detection2DArray>("/pose_estimation/PrimA6D/detection2D_array", 1000);
 }
 
-void ROSThread::run()
+void ROSThread::run() 
 {
   ros::AsyncSpinner spinner(0);
   spinner.start();
@@ -149,6 +149,7 @@ void ROSThread::ready()
     // load data stamp
     fs.open((m_data_load_path + "/data_stamp.csv").c_str());
     m_data_stamp.clear();
+    m_stop_period.clear();
     while (!fs.eof())
     {
         getline(fs, line);
@@ -335,7 +336,7 @@ void ROSThread::ready()
 }
 
 void ROSThread::TimerCallback(const ros::TimerEvent&)
-{
+{    
     int64_t current_stamp = ros::Time::now().toNSec();
     if(m_play_flag == true && m_pause_flag == false)
     {
@@ -351,12 +352,12 @@ void ROSThread::TimerCallback(const ros::TimerEvent&)
 }
 
 void ROSThread::DataStampThread()
-{
+{    
     auto stop_region_iter = m_stop_period.begin();
 
     for(auto iter = m_data_stamp.begin() ; iter != m_data_stamp.end() ; iter ++)
     {
-        auto stamp = iter->first;
+        auto stamp = iter->first;        
 
         while((stamp > (m_initial_data_stamp + m_processed_stamp))&&(m_data_stamp_data.active == true))
         {

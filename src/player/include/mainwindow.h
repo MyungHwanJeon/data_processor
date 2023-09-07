@@ -37,6 +37,7 @@ private:
 
     QMutex m_mutex;
     ROSThread *m_ros_thread;
+    ros::NodeHandle nh;
 
     QString m_data_load_path;
     int m_slider_value;

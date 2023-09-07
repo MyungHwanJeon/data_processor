@@ -6,8 +6,7 @@ int main(int argc, char *argv[])
     ros::NodeHandle nh;
 
     QApplication a(argc, argv);
-    MainWindow w;
-    w.RosInit(nh);
+    MainWindow w;    
     w.show();
 
     return a.exec();

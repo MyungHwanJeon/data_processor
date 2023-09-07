@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     m_ros_thread->start();
 
-
     ui->pushButton_play->setEnabled(false);
     ui->pushButton_pause->setEnabled(false);
 
@@ -25,8 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(m_ros_thread, SIGNAL(StampShow(quint64)), this, SLOT(SetStamp(quint64)));
     connect(m_ros_thread, SIGNAL(PlayEnd()), this, SLOT(on_pushButton_pause_pressed()));
-
-
 }
 
 MainWindow::~MainWindow()
@@ -43,6 +40,7 @@ MainWindow::~MainWindow()
 void MainWindow::RosInit(ros::NodeHandle &n)
 {
     m_ros_thread->ros_initialize(n);    
+    nh = n;
 }
 
 void MainWindow::on_pushButton_load_path_pressed()
@@ -55,9 +53,23 @@ void MainWindow::on_pushButton_load_path_pressed()
 
     sleep(1);
 
+    m_ros_thread->quit();
+    if(!m_ros_thread->wait(500))
+    {
+        m_ros_thread->terminate();
+        m_ros_thread->wait();
+    }
+    m_ros_thread->~ROSThread();
+    m_ros_thread = new ROSThread(this, &m_mutex);    
+    m_ros_thread->start();        
+    connect(m_ros_thread, SIGNAL(StampShow(quint64)), this, SLOT(SetStamp(quint64)));
+    connect(m_ros_thread, SIGNAL(PlayEnd()), this, SLOT(on_pushButton_pause_pressed()));
+    m_ros_thread->ros_initialize(nh);  
+
+    sleep(1);
+
     ui->textEdit_load_path->setText(m_data_load_path);
-    m_ros_thread->m_data_load_path = m_data_load_path.toUtf8().constData();
-    
+    m_ros_thread->m_data_load_path = m_data_load_path.toUtf8().constData();    
 
     m_ros_thread->m_play_flag = false;
     m_ros_thread->m_pause_flag = false;
@@ -69,6 +81,10 @@ void MainWindow::on_pushButton_load_path_pressed()
 
     m_slider_value = 1;
     ui->horizontalSlider_pos->setValue(1);
+
+    m_slider_checker = true;
+    m_ros_thread->ResetProcessStamp(m_slider_value);
+    m_slider_checker = false;
 
     ui->pushButton_load_path->setEnabled(true);
 }
@@ -98,7 +114,7 @@ void MainWindow::on_pushButton_pause_pressed()
 }
 
 void MainWindow::on_horizontalSlider_pos_valueChanged(int value)
-{
+{    
     if (value < 1)    m_slider_value = 1;
     else              m_slider_value = value;  
 }
